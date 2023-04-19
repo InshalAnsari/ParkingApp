@@ -41,13 +41,8 @@ class SlotsInput extends Component<Props, IState> {
           testID="button"
           disabled={this.state.inputVal === ''}
           onPress={() => {
-            this.setState(() => {
-              navigation?.push('BookedSlots', {
-                no: +this.state.inputVal,
-              });
-              this.setState({
-                inputVal: '',
-              });
+            navigation?.replace('BookedSlots', {
+              no: +this.state.inputVal,
             });
           }}>
           <View style={styles.btnContainer}>

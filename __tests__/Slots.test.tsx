@@ -7,8 +7,9 @@ type Nav = Navigation<'SlotsInput'>['navigation'];
 type Route = Navigation<'SlotsInput'>['route'];
 
 const navigation = {
-  navigate: jest.fn(),
+  navigation: jest.fn(),
   goBack: jest.fn(),
+  replace:jest.fn()
 } as Partial<Nav>;
 
 const route = {params: undefined} as Route;
@@ -29,5 +30,7 @@ describe('Slots Input Screen', () => {
     const submitterName = getByTestId('button');
     fireEvent.press(submitterName);
     expect(submitterName).toBeTruthy();
+    // expect(navigation.replace).toHaveBeenCalledWith('BookedSlots', { no: 5 });
   });
+
 });

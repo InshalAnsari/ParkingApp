@@ -6,6 +6,7 @@ import {
   View,
   Alert,
   TouchableWithoutFeedback,
+  TextInput,
 } from 'react-native';
 import {BookedSlotNavigationProp, BookedSlotScreenRouteProp} from '../types';
 import moment from 'moment';
@@ -16,7 +17,13 @@ type IProps = {
 };
 
 interface IState {
-  noOfSlots: {id: number; isBooked: boolean; startHour: string}[];
+  noOfSlots: {
+    id: number;
+    isBooked: boolean;
+    startHour: string;
+    reg: string;
+  }[];
+  regNo: string;
 }
 
 class BookedSlots extends Component<IProps, IState> {
@@ -24,6 +31,7 @@ class BookedSlots extends Component<IProps, IState> {
     super(props);
     this.state = {
       noOfSlots: [],
+      regNo: '',
     };
   }
   // Creates an Object with N size passed in props
@@ -34,6 +42,7 @@ class BookedSlots extends Component<IProps, IState> {
         id: i + 1,
         isBooked: false,
         startHour: '00:00',
+        reg: '',
       };
     }
     this.setState({
@@ -49,7 +58,7 @@ class BookedSlots extends Component<IProps, IState> {
     item,
     index,
   }: {
-    item: {id: number; isBooked: boolean; startHour: string};
+    item: {id: number; isBooked: boolean; startHour: string; reg: string};
     index: number;
   }) => (
     <View
@@ -58,7 +67,7 @@ class BookedSlots extends Component<IProps, IState> {
         {backgroundColor: item.isBooked ? '#90EE90' : '#ffff'},
       ]}>
       <Text testID="status" style={{color: '#000'}}>
-        {item.isBooked ? 'Alloted' : 'Not Alloted'}
+        {item.reg ? item.reg : 'Not Alloted'}
       </Text>
       <TouchableWithoutFeedback
         testID="free-space"
@@ -81,6 +90,7 @@ class BookedSlots extends Component<IProps, IState> {
           ...data,
           isBooked: false,
           startHour: '00:00',
+          regNo: '',
         };
       }
       return data;
@@ -93,14 +103,13 @@ class BookedSlots extends Component<IProps, IState> {
     );
   };
 
-  // Calculate the PRice based on Hours parked 
+  // Calculate the PRice based on Hours parked
   totalHour = (item: {id: number; isBooked: boolean; startHour: string}) => {
     var end = moment();
     var duration = moment.duration(end.diff(item.startHour)).asSeconds();
     let totalMinute = moment.utc(duration * 1000).format('mm');
     let totalAmt = 10;
     if (+totalMinute > 2) {
-      console.log('In If');
       let extraHrs = +totalMinute - 2;
       totalAmt += extraHrs * 10;
     }
@@ -116,28 +125,44 @@ class BookedSlots extends Component<IProps, IState> {
 
   // Allocate the space based on Random No
   getSlotBooked = () => {
-    let temp = this.state.noOfSlots[this.getRandomNo()];
+    let space = false;
+    let index = -1;
+    while (!space) {
+      index = this.getRandomNo();
+      if (this.state.noOfSlots[index].isBooked === true) continue;
+      else space = true;
+    }
+    let temp = this.state.noOfSlots[index];
     let newArr = this.state.noOfSlots.map(data => {
       if (data.id === temp.id) {
         return {
           ...data,
           isBooked: true,
+          reg: this.state.regNo,
           startHour: moment(new Date()).toString(), //todays date
         };
       }
       return data;
     });
-    this.setState(
-      {
-        noOfSlots: newArr,
-      },
-      () => console.log(JSON.stringify(this.state.noOfSlots, undefined, 4)),
-    );
+    this.setState({
+      noOfSlots: newArr,
+      regNo: '',
+    });
   };
 
   render() {
     return (
       <View style={styles.container}>
+        <TextInput
+          placeholder="Enter Registration No"
+          testID="input"
+          placeholderTextColor="#a9a9a9"
+          style={styles.inputBox}
+          value={this.state.regNo}
+          onChangeText={val => {
+            this.setState({regNo: val});
+          }}
+        />
         <FlatList
           data={this.state.noOfSlots}
           testID="flat-list"
@@ -145,7 +170,15 @@ class BookedSlots extends Component<IProps, IState> {
           keyExtractor={(item, index) => index.toString()}
           renderItem={this.renderItem}
         />
-        <TouchableWithoutFeedback onPress={this.getSlotBooked}>
+        <TouchableWithoutFeedback
+          testID='addSlot'
+          onPress={() => {
+            if (this.state.regNo === '') {
+              Alert.alert('Please Enter Register No to Continue');
+            } else {
+              this.getSlotBooked();
+            }
+          }}>
           <View style={styles.absContainer}>
             <Text style={{fontSize: 30, color: '#fff'}}>+</Text>
           </View>
@@ -178,6 +211,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     bottom: 20,
     right: 20,
+  },
+  inputBox: {
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 8,
+    paddingHorizontal: 9,
+    color: '#000',
   },
 });
 export default BookedSlots;

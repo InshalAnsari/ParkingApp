@@ -7,6 +7,7 @@ import {
 } from '@testing-library/react-native';
 import BookedSlots from '../src/screens/BookedSlots';
 import {Navigation} from '../src/types';
+
 type Nav = Navigation<'BookedSlots'>['navigation'];
 type Route = Navigation<'BookedSlots'>['route'];
 
@@ -50,4 +51,22 @@ describe('BookedSlot Screen', () => {
     fireEvent.press(submitterName);
     expect(submitterName).toBeTruthy();
   });
+
+  it('Should apply the value when changing text', () => {
+    const {getByTestId} = render(<BookedSlots {...props} />);
+    const input = getByTestId('input');
+    console.log("Input : ",input);
+    fireEvent.changeText(input, '123');
+    expect(input.props.value).toBe('123');
+    expect(input.props.placeholder).toBe('Enter Registration No');
+  });
+
+  it('should allocate Slot', () => {
+    const onPress = jest.fn();
+    const {getByTestId} = render(<BookedSlots {...props} />);
+    const submitterName = getByTestId('addSlot');
+    fireEvent.press(submitterName);
+    expect(submitterName).toBeTruthy();
+  });
+
 });
