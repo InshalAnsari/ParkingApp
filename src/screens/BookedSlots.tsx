@@ -90,7 +90,7 @@ class BookedSlots extends Component<IProps, IState> {
           ...data,
           isBooked: false,
           startHour: '00:00',
-          regNo: '',
+          reg: '',
         };
       }
       return data;
